@@ -662,6 +662,45 @@ export default function InvoicesPage() {
               </div>
             </div>
 
+            {/* Public Customer Payment Link */}
+            {selectedInvoice.paymentTokenHash && (
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded space-y-2">
+                <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider block">
+                  Public Client Payment Link
+                </span>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/pay/${selectedInvoice.paymentTokenHash}`}
+                    className="flex-1 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded font-mono text-slate-700 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const link = `${window.location.origin}/pay/${selectedInvoice.paymentTokenHash}`;
+                      navigator.clipboard.writeText(link);
+                      setCopiedLink(true);
+                      setTimeout(() => setCopiedLink(false), 2000);
+                    }}
+                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-slate-900 text-white rounded hover:bg-slate-800 transition-colors"
+                  >
+                    {copiedLink ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 mr-1" />
+                        Copy Link
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Payment Proofs Verification Section */}
             <div className="pt-4 border-t border-slate-200 space-y-3">
               <div className="flex items-center justify-between">

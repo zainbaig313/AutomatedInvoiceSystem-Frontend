@@ -89,6 +89,7 @@ export interface Invoice {
   status: InvoiceStatus;
   isRecurring: boolean;
   tokenExpiresAt: string;
+  paymentTokenHash?: string;
 }
 
 export interface CreateInvoiceDto {
