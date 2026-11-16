@@ -1,12 +1,6 @@
 import React from 'react';
-import { InvoiceStatus, ReviewStatus } from '@/types';
 
-interface StatusBadgeProps {
-  status: InvoiceStatus | ReviewStatus | string;
-  className?: string;
-}
-
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = '' }) => {
+export const StatusBadge = ({ status, className = '' }) => {
   const normalized = (status || '').toString().toLowerCase();
 
   let styles = 'bg-slate-100 text-slate-700 border-slate-200';
@@ -35,4 +29,3 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
     </span>
   );
 };
-

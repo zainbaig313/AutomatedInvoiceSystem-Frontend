@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { Bank } from '@/types';
 import { ArrowRight, AlertCircle, Info } from 'lucide-react';
 
 export default function RegisterPage() {
@@ -11,13 +10,13 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [bank, setBank] = useState<Bank>('HBL');
+  const [bank, setBank] = useState('HBL');
   const [bankAccountNumber, setBankAccountNumber] = useState('');
   const [digitalWallet, setDigitalWallet] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
@@ -36,12 +35,8 @@ export default function RegisterPage() {
         bankAccountNumber: bankAccountNumber.trim() || null,
         digitalWallet: digitalWallet.trim() || null,
       });
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Failed to create account.');
-      }
+    } catch (err) {
+      setError(err?.message || 'Failed to create account.');
     } finally {
       setIsSubmitting(false);
     }
@@ -127,7 +122,7 @@ export default function RegisterPage() {
                 </label>
                 <select
                   value={bank}
-                  onChange={(e) => setBank(e.target.value as Bank)}
+                  onChange={(e) => setBank(e.target.value)}
                   className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
                 >
                   <option value="HBL">Habib Bank Limited (HBL)</option>
@@ -191,4 +186,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

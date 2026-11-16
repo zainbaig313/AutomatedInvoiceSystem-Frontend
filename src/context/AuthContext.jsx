@@ -2,26 +2,14 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CreateUserDto, LoginRequestDto, UpdateUserDto, User } from '@/types';
 import { api, clearStoredToken, getStoredToken } from '@/lib/api';
 
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  isLoading: boolean;
-  login: (dto: LoginRequestDto) => Promise<void>;
-  register: (dto: CreateUserDto) => Promise<void>;
-  updateProfile: (dto: UpdateUserDto) => Promise<void>;
-  logout: () => void;
-  refreshUser: () => Promise<void>;
-}
+const AuthContext = createContext(undefined);
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   const refreshUser = async () => {
@@ -50,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser();
   }, []);
 
-  const login = async (dto: LoginRequestDto) => {
+  const login = async (dto) => {
     const res = await api.auth.login(dto);
     setToken(res.token);
     const profile = await api.auth.getMe();
@@ -58,13 +46,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/dashboard');
   };
 
-  const register = async (dto: CreateUserDto) => {
+  const register = async (dto) => {
     await api.auth.register(dto);
     // After register, automatically log in
     await login({ email: dto.email, password: dto.password });
   };
 
-  const updateProfile = async (dto: UpdateUserDto) => {
+  const updateProfile = async (dto) => {
     const updated = await api.auth.update(user?.id ?? 0, dto);
     setUser(updated);
   };

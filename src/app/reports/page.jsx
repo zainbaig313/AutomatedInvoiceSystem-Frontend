@@ -4,15 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
-import { Invoice } from '@/types';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
   FileSpreadsheet,
   Download,
-  Calendar,
-  DollarSign,
-  CheckCircle,
-  Clock,
   AlertCircle,
 } from 'lucide-react';
 
@@ -36,13 +31,13 @@ export default function ReportsPage() {
   const router = useRouter();
 
   const currentDate = new Date();
-  const [selectedYear, setSelectedYear] = useState<number>(currentDate.getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState<number>(currentDate.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
 
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -50,10 +45,10 @@ export default function ReportsPage() {
         router.replace('/login');
       } else {
         api.invoices
-          .getAll()
-          .then((res) => setInvoices(res))
-          .catch((err) => setError(err.message))
-          .finally(() => setLoading(false));
+            .getAll()
+            .then((res) => setInvoices(res))
+            .catch((err) => setError(err?.message || 'Error loading invoices'))
+            .finally(() => setLoading(false));
       }
     }
   }, [user, isLoading, router]);
@@ -63,9 +58,8 @@ export default function ReportsPage() {
       setDownloading(true);
       setError(null);
       await api.invoices.downloadMonthlyReport(selectedYear, selectedMonth);
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Failed to export Excel report.');
+    } catch (err) {
+      setError(err?.message || 'Failed to export Excel report.');
     } finally {
       setDownloading(false);
     }
@@ -75,7 +69,7 @@ export default function ReportsPage() {
   const monthString = selectedMonth.toString().padStart(2, '0');
   const targetPrefix = `${selectedYear}-${monthString}`;
 
-  const monthInvoices = invoices.filter((i) => i.issueDate.startsWith(targetPrefix));
+  const monthInvoices = invoices.filter((i) => i.issueDate?.startsWith(targetPrefix));
   const monthTotal = monthInvoices.reduce((acc, i) => acc + (i.amount || 0), 0);
   const monthPaid = monthInvoices
     .filter((i) => i.status === 'Paid')
@@ -255,4 +249,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-

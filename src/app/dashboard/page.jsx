@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
-import { Invoice, Client } from '@/types';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
   FileText,
@@ -23,10 +22,10 @@ export default function DashboardPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
+  const [invoices, setInvoices] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [, startTransition] = useTransition();
 
   const loadData = async () => {
@@ -39,12 +38,8 @@ export default function DashboardPage() {
       ]);
       setInvoices(invList);
       setClients(clientList);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Failed to fetch dashboard data.');
-      }
+    } catch (err) {
+      setError(err?.message || 'Failed to fetch dashboard data.');
     } finally {
       setLoadingData(false);
     }
@@ -78,7 +73,7 @@ export default function DashboardPage() {
 
   const recentInvoices = [...invoices].slice(0, 5);
 
-  const handleDownloadPdf = async (id: number, number: string) => {
+  const handleDownloadPdf = async (id, number) => {
     try {
       await api.invoices.downloadPdf(id, number);
     } catch {
@@ -86,15 +81,15 @@ export default function DashboardPage() {
     }
   };
 
-  const handleMarkPaid = async (id: number) => {
+  const handleMarkPaid = async (id) => {
     if (!confirm('Mark this invoice as Paid?')) return;
     try {
       await api.invoices.markAsPaid(id);
       startTransition(() => {
         loadData();
       });
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to update invoice.');
+    } catch (err) {
+      alert(err?.message || 'Failed to update invoice.');
     }
   };
 
@@ -401,4 +396,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

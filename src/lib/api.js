@@ -1,39 +1,22 @@
-import {
-  Client,
-  CreateClientDto,
-  UpdateClientDto,
-  BulkImportResponse,
-  CreateInvoiceDto,
-  CreateUserDto,
-  Invoice,
-  LoginRequestDto,
-  LoginResponse,
-  PaymentProof,
-  PublicInvoice,
-  ReviewProofDto,
-  UpdateUserDto,
-  User,
-} from '@/types';
-
 const API_BASE = '/api';
 
-export function getStoredToken(): string | null {
+export function getStoredToken() {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('invoiceflow_token');
 }
 
-export function setStoredToken(token: string): void {
+export function setStoredToken(token) {
   if (typeof window === 'undefined') return;
   localStorage.setItem('invoiceflow_token', token);
 }
 
-export function clearStoredToken(): void {
+export function clearStoredToken() {
   if (typeof window === 'undefined') return;
   localStorage.removeItem('invoiceflow_token');
   localStorage.removeItem('invoiceflow_user');
 }
 
-async function handleResponse<T>(res: Response): Promise<T> {
+async function handleResponse(res) {
   if (!res.ok) {
     let errorMsg = `Request failed (${res.status})`;
     try {
@@ -50,15 +33,15 @@ async function handleResponse<T>(res: Response): Promise<T> {
   }
 
   if (res.status === 204) {
-    return {} as T;
+    return {};
   }
 
   return res.json();
 }
 
-function getAuthHeaders(): HeadersInit {
+function getAuthHeaders() {
   const token = getStoredToken();
-  const headers: Record<string, string> = {
+  const headers = {
     'Content-Type': 'application/json',
   };
   if (token) {
@@ -70,87 +53,87 @@ function getAuthHeaders(): HeadersInit {
 // ── Auth & Users ─────────────────────────────────────────────────────────────
 export const api = {
   auth: {
-    async login(dto: LoginRequestDto): Promise<LoginResponse> {
+    async login(dto) {
       const res = await fetch(`${API_BASE}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dto),
       });
-      const data = await handleResponse<LoginResponse>(res);
+      const data = await handleResponse(res);
       setStoredToken(data.token);
       return data;
     },
 
-    async register(dto: CreateUserDto): Promise<User> {
+    async register(dto) {
       const res = await fetch(`${API_BASE}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dto),
       });
-      return handleResponse<User>(res);
+      return handleResponse(res);
     },
 
-    async getMe(): Promise<User> {
+    async getMe() {
       const res = await fetch(`${API_BASE}/users/me`, {
         headers: getAuthHeaders(),
       });
-      return handleResponse<User>(res);
+      return handleResponse(res);
     },
 
-    async update(id: number, dto: UpdateUserDto): Promise<User> {
+    async update(id, dto) {
       const endpoint = id && id > 0 ? `${API_BASE}/users/${id}` : `${API_BASE}/users/me`;
       const res = await fetch(endpoint, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(dto),
       });
-      return handleResponse<User>(res);
+      return handleResponse(res);
     },
   },
 
   // ── Clients ────────────────────────────────────────────────────────────────
   clients: {
-    async getAll(): Promise<Client[]> {
+    async getAll() {
       const res = await fetch(`${API_BASE}/clients`, {
         headers: getAuthHeaders(),
       });
-      return handleResponse<Client[]>(res);
+      return handleResponse(res);
     },
 
-    async getById(id: number): Promise<Client> {
+    async getById(id) {
       const res = await fetch(`${API_BASE}/clients/${id}`, {
         headers: getAuthHeaders(),
       });
-      return handleResponse<Client>(res);
+      return handleResponse(res);
     },
 
-    async create(dto: CreateClientDto): Promise<Client> {
+    async create(dto) {
       const res = await fetch(`${API_BASE}/clients`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(dto),
       });
-      return handleResponse<Client>(res);
+      return handleResponse(res);
     },
 
-    async update(id: number, dto: UpdateClientDto): Promise<Client> {
+    async update(id, dto) {
       const res = await fetch(`${API_BASE}/clients/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(dto),
       });
-      return handleResponse<Client>(res);
+      return handleResponse(res);
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id) {
       const res = await fetch(`${API_BASE}/clients/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
-      await handleResponse<void>(res);
+      await handleResponse(res);
     },
 
-    async import(file: File): Promise<BulkImportResponse> {
+    async import(file) {
       const token = getStoredToken();
       const formData = new FormData();
       formData.append('file', file);
@@ -160,52 +143,52 @@ export const api = {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
-      return handleResponse<BulkImportResponse>(res);
+      return handleResponse(res);
     },
   },
 
   // ── Invoices ───────────────────────────────────────────────────────────────
   invoices: {
-    async getAll(): Promise<Invoice[]> {
+    async getAll() {
       const res = await fetch(`${API_BASE}/invoices`, {
         headers: getAuthHeaders(),
       });
-      return handleResponse<Invoice[]>(res);
+      return handleResponse(res);
     },
 
-    async getById(id: number): Promise<Invoice> {
+    async getById(id) {
       const res = await fetch(`${API_BASE}/invoices/${id}`, {
         headers: getAuthHeaders(),
       });
-      return handleResponse<Invoice>(res);
+      return handleResponse(res);
     },
 
-    async create(dto: CreateInvoiceDto): Promise<Invoice> {
+    async create(dto) {
       const res = await fetch(`${API_BASE}/invoices`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(dto),
       });
-      return handleResponse<Invoice>(res);
+      return handleResponse(res);
     },
 
-    async markAsPaid(id: number): Promise<{ message: string }> {
+    async markAsPaid(id) {
       const res = await fetch(`${API_BASE}/invoices/${id}/mark-paid`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
       });
-      return handleResponse<{ message: string }>(res);
+      return handleResponse(res);
     },
 
-    async delete(id: number): Promise<void> {
+    async delete(id) {
       const res = await fetch(`${API_BASE}/invoices/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
-      await handleResponse<void>(res);
+      await handleResponse(res);
     },
 
-    async downloadPdf(id: number, invoiceNumber: string): Promise<void> {
+    async downloadPdf(id, invoiceNumber) {
       const token = getStoredToken();
       const res = await fetch(`${API_BASE}/invoices/${id}/pdf`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -224,7 +207,7 @@ export const api = {
       document.body.removeChild(a);
     },
 
-    async downloadMonthlyReport(year: number, month: number): Promise<void> {
+    async downloadMonthlyReport(year, month) {
       const token = getStoredToken();
       const res = await fetch(`${API_BASE}/invoices/report?year=${year}&month=${month}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -254,23 +237,23 @@ export const api = {
 
   // ── Payment Proofs ─────────────────────────────────────────────────────────
   proofs: {
-    async getByInvoice(invoiceId: number): Promise<PaymentProof[]> {
+    async getByInvoice(invoiceId) {
       const res = await fetch(`${API_BASE}/payment-proofs/invoice/${invoiceId}`, {
         headers: getAuthHeaders(),
       });
-      return handleResponse<PaymentProof[]>(res);
+      return handleResponse(res);
     },
 
-    async review(proofId: number, dto: ReviewProofDto): Promise<PaymentProof> {
+    async review(proofId, dto) {
       const res = await fetch(`${API_BASE}/payment-proofs/${proofId}/review`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify(dto),
       });
-      return handleResponse<PaymentProof>(res);
+      return handleResponse(res);
     },
 
-    async downloadFile(proofId: number, fileName: string): Promise<void> {
+    async downloadFile(proofId, fileName) {
       const token = getStoredToken();
       const res = await fetch(`${API_BASE}/payment-proofs/${proofId}/file`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -292,12 +275,12 @@ export const api = {
 
   // ── Public Customer Portal ────────────────────────────────────────────────
   public: {
-    async getInvoice(token: string): Promise<PublicInvoice> {
+    async getInvoice(token) {
       const res = await fetch(`${API_BASE}/public/invoices/${token}`);
-      return handleResponse<PublicInvoice>(res);
+      return handleResponse(res);
     },
 
-    async downloadPdf(token: string, invoiceNumber: string): Promise<void> {
+    async downloadPdf(token, invoiceNumber) {
       const res = await fetch(`${API_BASE}/public/invoices/${token}/pdf`);
       if (!res.ok) {
         throw new Error('Failed to download PDF');
@@ -313,7 +296,7 @@ export const api = {
       document.body.removeChild(a);
     },
 
-    async uploadProof(token: string, file: File): Promise<{ message: string; proof: PaymentProof }> {
+    async uploadProof(token, file) {
       const formData = new FormData();
       formData.append('file', file);
 
@@ -321,8 +304,7 @@ export const api = {
         method: 'POST',
         body: formData,
       });
-      return handleResponse<{ message: string; proof: PaymentProof }>(res);
+      return handleResponse(res);
     },
   },
 };
-

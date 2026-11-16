@@ -3,15 +3,7 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-}
-
-export const Modal: React.FC<ModalProps> = ({
+export const Modal = ({
   isOpen,
   onClose,
   title,
@@ -19,7 +11,7 @@ export const Modal: React.FC<ModalProps> = ({
   maxWidth = 'md',
 }) => {
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
     };
     if (isOpen) {
@@ -40,7 +32,7 @@ export const Modal: React.FC<ModalProps> = ({
     lg: 'max-w-lg',
     xl: 'max-w-xl',
     '2xl': 'max-w-2xl',
-  }[maxWidth];
+  }[maxWidth] || 'max-w-md';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -70,4 +62,3 @@ export const Modal: React.FC<ModalProps> = ({
     </div>
   );
 };
-

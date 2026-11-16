@@ -4,7 +4,6 @@ import React, { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
-import { Invoice, Client, CreateInvoiceDto, PaymentProof, InvoiceStatus } from '@/types';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Modal } from '@/components/Modal';
 import {
@@ -27,18 +26,18 @@ export default function InvoicesPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
+  const [invoices, setInvoices] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'All' | InvoiceStatus>('All');
+  const [statusFilter, setStatusFilter] = useState('All');
 
   // Create Invoice Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [createForm, setCreateForm] = useState<CreateInvoiceDto>({
+  const [createForm, setCreateForm] = useState({
     clientId: 0,
     description: '',
     amount: 0,
@@ -47,16 +46,16 @@ export default function InvoicesPage() {
     isRecurring: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState(null);
 
   // View Details Modal State
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [invoiceProofs, setInvoiceProofs] = useState<PaymentProof[]>([]);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [invoiceProofs, setInvoiceProofs] = useState([]);
   const [loadingProofs, setLoadingProofs] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Proof Review Modal State
-  const [rejectModalProof, setRejectModalProof] = useState<PaymentProof | null>(null);
+  const [rejectModalProof, setRejectModalProof] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [reviewingProof, setReviewingProof] = useState(false);
 
@@ -75,9 +74,8 @@ export default function InvoicesPage() {
       if (clientList.length > 0 && createForm.clientId === 0) {
         setCreateForm((prev) => ({ ...prev, clientId: clientList[0].id }));
       }
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Failed to load invoices.');
+    } catch (err) {
+      setError(err?.message || 'Failed to load invoices.');
     } finally {
       setLoading(false);
     }
@@ -91,7 +89,7 @@ export default function InvoicesPage() {
   }, [user, isLoading, router]);
 
   // Load proofs when selectedInvoice changes
-  const handleSelectInvoice = async (invoice: Invoice) => {
+  const handleSelectInvoice = async (invoice) => {
     setSelectedInvoice(invoice);
     try {
       setLoadingProofs(true);
@@ -105,7 +103,7 @@ export default function InvoicesPage() {
     }
   };
 
-  const handleCreateSubmit = async (e: React.FormEvent) => {
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
     setCreateError(null);
 
@@ -135,15 +133,14 @@ export default function InvoicesPage() {
         isRecurring: false,
       });
       loadData();
-    } catch (err: unknown) {
-      if (err instanceof Error) setCreateError(err.message);
-      else setCreateError('Failed to create invoice.');
+    } catch (err) {
+      setCreateError(err?.message || 'Failed to create invoice.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDownloadPdf = async (id: number, number: string) => {
+  const handleDownloadPdf = async (id, number) => {
     try {
       await api.invoices.downloadPdf(id, number);
     } catch {
@@ -151,7 +148,7 @@ export default function InvoicesPage() {
     }
   };
 
-  const handleMarkPaid = async (id: number) => {
+  const handleMarkPaid = async (id) => {
     if (!confirm('Are you sure you want to mark this invoice as Paid?')) return;
     try {
       await api.invoices.markAsPaid(id);
@@ -159,12 +156,12 @@ export default function InvoicesPage() {
       if (selectedInvoice && selectedInvoice.id === id) {
         setSelectedInvoice((prev) => (prev ? { ...prev, status: 'Paid' } : null));
       }
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Error marking invoice as paid.');
+    } catch (err) {
+      alert(err?.message || 'Error marking invoice as paid.');
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to permanently delete this invoice?')) return;
     try {
       await api.invoices.delete(id);
@@ -172,12 +169,12 @@ export default function InvoicesPage() {
         setSelectedInvoice(null);
       }
       loadData();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Error deleting invoice.');
+    } catch (err) {
+      alert(err?.message || 'Error deleting invoice.');
     }
   };
 
-  const handleApproveProof = async (proof: PaymentProof) => {
+  const handleApproveProof = async (proof) => {
     if (!confirm('Approve this payment proof? This will mark the invoice as Paid.')) return;
     try {
       setReviewingProof(true);
@@ -186,8 +183,8 @@ export default function InvoicesPage() {
         handleSelectInvoice(selectedInvoice);
       }
       loadData();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to approve proof.');
+    } catch (err) {
+      alert(err?.message || 'Failed to approve proof.');
     } finally {
       setReviewingProof(false);
     }
@@ -212,14 +209,14 @@ export default function InvoicesPage() {
         handleSelectInvoice(selectedInvoice);
       }
       loadData();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to reject proof.');
+    } catch (err) {
+      alert(err?.message || 'Failed to reject proof.');
     } finally {
       setReviewingProof(false);
     }
   };
 
-  const handleDownloadProofFile = async (proofId: number, filename: string) => {
+  const handleDownloadProofFile = async (proofId, filename) => {
     try {
       await api.proofs.downloadFile(proofId, filename);
     } catch {
@@ -285,7 +282,7 @@ export default function InvoicesPage() {
 
         {/* Status Filter Tabs */}
         <div className="flex items-center space-x-1 overflow-x-auto text-xs font-medium">
-          {(['All', 'Pending', 'ProofSubmitted', 'Paid', 'Rejected'] as const).map((status) => (
+          {['All', 'Pending', 'ProofSubmitted', 'Paid', 'Rejected'].map((status) => (
             <button
               key={status}
               type="button"
@@ -846,4 +843,3 @@ export default function InvoicesPage() {
     </div>
   );
 }
-

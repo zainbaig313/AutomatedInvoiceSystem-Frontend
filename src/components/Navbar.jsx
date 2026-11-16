@@ -14,7 +14,7 @@ import {
   Building,
 } from 'lucide-react';
 
-export const Navbar: React.FC = () => {
+export const Navbar = () => {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
@@ -127,4 +127,3 @@ export const Navbar: React.FC = () => {
     </header>
   );
 };
-

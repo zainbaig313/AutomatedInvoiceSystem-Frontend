@@ -9,10 +9,10 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     if (!email || !password) {
@@ -23,12 +23,8 @@ export default function LoginPage() {
     try {
       setIsSubmitting(true);
       await login({ email, password });
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Login failed. Please check your credentials.');
-      }
+    } catch (err) {
+      setError(err?.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsSubmitting(false);
     }
@@ -112,4 +108,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

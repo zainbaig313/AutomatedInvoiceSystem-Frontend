@@ -3,10 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
-import { PublicInvoice } from '@/types';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
-  FileText,
   Download,
   Upload,
   CheckCircle2,
@@ -18,17 +16,17 @@ import {
 
 export default function PublicInvoicePage() {
   const params = useParams();
-  const token = params?.token as string;
+  const token = params?.token;
 
-  const [invoice, setInvoice] = useState<PublicInvoice | null>(null);
+  const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   // File upload state
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(null);
+  const [uploadError, setUploadError] = useState(null);
 
   const loadInvoice = async () => {
     if (!token) return;
@@ -57,7 +55,7 @@ export default function PublicInvoicePage() {
     }
   };
 
-  const handleUploadProof = async (e: React.FormEvent) => {
+  const handleUploadProof = async (e) => {
     e.preventDefault();
     if (!file || !token) return;
 
@@ -80,9 +78,8 @@ export default function PublicInvoicePage() {
       setFile(null);
       // Update invoice status locally to ProofSubmitted
       setInvoice((prev) => (prev ? { ...prev, status: 'ProofSubmitted' } : null));
-    } catch (err: unknown) {
-      if (err instanceof Error) setUploadError(err.message);
-      else setUploadError('Failed to upload proof of payment.');
+    } catch (err) {
+      setUploadError(err?.message || 'Failed to upload proof of payment.');
     } finally {
       setUploading(false);
     }
@@ -298,4 +295,3 @@ export default function PublicInvoicePage() {
     </div>
   );
 }
-

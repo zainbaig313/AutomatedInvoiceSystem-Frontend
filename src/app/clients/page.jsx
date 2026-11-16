@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
-import { Client, CreateClientDto, UpdateClientDto } from '@/types';
 import { Modal } from '@/components/Modal';
 import {
   Users,
@@ -19,7 +18,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  FileSpreadsheet,
   Download,
   AlertCircle,
   CheckCircle,
@@ -29,15 +27,15 @@ export default function ClientsPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  const [clients, setClients] = useState<Client[]>([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Add / Edit Client Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingClient, setEditingClient] = useState<Client | null>(null);
-  const [clientForm, setClientForm] = useState<CreateClientDto>({
+  const [editingClient, setEditingClient] = useState(null);
+  const [clientForm, setClientForm] = useState({
     name: '',
     email: '',
     phone: '',
@@ -45,15 +43,15 @@ export default function ClientsPage() {
     city: '',
     isReminderEnabled: true,
   });
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Bulk Import Modal State
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importFile, setImportFile] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
-  const [importResult, setImportResult] = useState<string | null>(null);
-  const [importError, setImportError] = useState<string | null>(null);
+  const [importResult, setImportResult] = useState(null);
+  const [importError, setImportError] = useState(null);
 
   const loadClients = async () => {
     try {
@@ -61,9 +59,8 @@ export default function ClientsPage() {
       setError(null);
       const data = await api.clients.getAll();
       setClients(data);
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Failed to load clients.');
+    } catch (err) {
+      setError(err?.message || 'Failed to load clients.');
     } finally {
       setLoading(false);
     }
@@ -90,7 +87,7 @@ export default function ClientsPage() {
     setIsAddModalOpen(true);
   };
 
-  const handleOpenEdit = (client: Client) => {
+  const handleOpenEdit = (client) => {
     setEditingClient(client);
     setClientForm({
       name: client.name,
@@ -104,7 +101,7 @@ export default function ClientsPage() {
     setIsAddModalOpen(true);
   };
 
-  const handleSaveClient = async (e: React.FormEvent) => {
+  const handleSaveClient = async (e) => {
     e.preventDefault();
     setFormError(null);
 
@@ -137,25 +134,24 @@ export default function ClientsPage() {
 
       setIsAddModalOpen(false);
       loadClients();
-    } catch (err: unknown) {
-      if (err instanceof Error) setFormError(err.message);
-      else setFormError('Error saving client.');
+    } catch (err) {
+      setFormError(err?.message || 'Error saving client.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDeleteClient = async (id: number, name: string) => {
+  const handleDeleteClient = async (id, name) => {
     if (!confirm(`Are you sure you want to delete client "${name}"?`)) return;
     try {
       await api.clients.delete(id);
       loadClients();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to delete client.');
+    } catch (err) {
+      alert(err?.message || 'Failed to delete client.');
     }
   };
 
-  const handleImportSubmit = async (e: React.FormEvent) => {
+  const handleImportSubmit = async (e) => {
     e.preventDefault();
     setImportError(null);
     setImportResult(null);
@@ -171,9 +167,8 @@ export default function ClientsPage() {
       setImportResult(res.message);
       setImportFile(null);
       loadClients();
-    } catch (err: unknown) {
-      if (err instanceof Error) setImportError(err.message);
-      else setImportError('Import failed.');
+    } catch (err) {
+      setImportError(err?.message || 'Import failed.');
     } finally {
       setIsImporting(false);
     }
@@ -566,4 +561,3 @@ export default function ClientsPage() {
     </div>
   );
 }
-

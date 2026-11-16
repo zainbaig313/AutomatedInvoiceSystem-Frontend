@@ -3,10 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Bank } from '@/types';
 import {
-  Settings,
-  Building,
   CreditCard,
   Smartphone,
   Save,
@@ -21,13 +18,13 @@ export default function SettingsPage() {
   const router = useRouter();
 
   const [name, setName] = useState('');
-  const [bank, setBank] = useState<Bank>('HBL');
+  const [bank, setBank] = useState('HBL');
   const [bankAccountNumber, setBankAccountNumber] = useState('');
   const [digitalWallet, setDigitalWallet] = useState('');
 
   const [saving, setSaving] = useState(false);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -35,14 +32,14 @@ export default function SettingsPage() {
         router.replace('/login');
       } else {
         setName(user.name || '');
-        setBank((user.bank as Bank) || 'HBL');
+        setBank(user.bank || 'HBL');
         setBankAccountNumber(user.bankAccountNumber || '');
         setDigitalWallet(user.digitalWallet || '');
       }
     }
   }, [user, isLoading, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccessMsg(null);
     setErrorMsg(null);
@@ -61,9 +58,8 @@ export default function SettingsPage() {
         digitalWallet: digitalWallet.trim() || null,
       });
       setSuccessMsg('Profile and payout settings updated successfully.');
-    } catch (err: unknown) {
-      if (err instanceof Error) setErrorMsg(err.message);
-      else setErrorMsg('Failed to update settings.');
+    } catch (err) {
+      setErrorMsg(err?.message || 'Failed to update settings.');
     } finally {
       setSaving(false);
     }
@@ -148,7 +144,7 @@ export default function SettingsPage() {
               </label>
               <select
                 value={bank}
-                onChange={(e) => setBank(e.target.value as Bank)}
+                onChange={(e) => setBank(e.target.value)}
                 className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-slate-900"
               >
                 <option value="HBL">Habib Bank Limited (HBL)</option>
@@ -231,4 +227,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
